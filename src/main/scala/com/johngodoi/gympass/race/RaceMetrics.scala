@@ -6,32 +6,32 @@ object RaceMetrics {
 
   private def groupByPilot(records: List[LogRecord]) = records.groupBy(_.name)
 
-  def rankWithTimeDifferences(records: List[LogRecord]):List[(String,Duration)] = {
-    val finishingTime = groupByPilot(records).map(pr => (pr._1, pr._2.map(_.time).max))
+  def rankWithTimeDifferences(records: List[LogRecord]) = {
+    val finishingTime = processByPilot(
+      records,
+      xs => xs.map(_.time).max
+    )
     val smallerFinishingTime = finishingTime.values.min
-    finishingTime.map(ft =>(ft._1,Duration.between(ft._2,smallerFinishingTime)))
+    finishingTime.mapValues(Duration.between(_,smallerFinishingTime))
       .toList.sortWith((r1,r2) => r1._2.compareTo(r2._2)>0)
   }
 
-  def averageSpeedByPilot(records: List[LogRecord]):List[(String,Double)] = groupByPilot(records)
-    .map(pr => (
-      pr._1,
-      pr._2.map(_.lapAverageSpeed).sum/pr._2.size
-    )).toList
+  def averageSpeedByPilot(records: List[LogRecord]) = processByPilot(
+    records,
+    xs => xs.map(_.lapAverageSpeed).sum/xs.size
+  ).toList
 
-  def bestLap(records: List[LogRecord]):(String,Duration) = groupByPilot(records)
-    .map(r => (
-      r._1,
-      r._2.map(_.lapTime).min
-    )).minBy(_._2)
+  def bestLapsByPilot(records: List[LogRecord]) = processByPilot(
+    records,
+    xs => xs.map(_.lapTime).min
+  ).toList
 
-  def bestLapsByPilot(records: List[LogRecord]):List[(String, Duration)] = groupByPilot(records)
-    .map(pr => (
-      pr._1,
-      pr._2.map(_.lapTime).min
-    )).toList
+  def processByPilot[A](records: List[LogRecord], f: List[LogRecord] => A) = groupByPilot(records)
+    .mapValues(f(_))
 
-  def rank(records: List[LogRecord]):List[(Int, String, String, Int, Duration)] = {
+  def bestLap(records: List[LogRecord]) = bestLapsByPilot(records).minBy(_._2)
+
+  def rank(records: List[LogRecord]) = {
     val rank = groupByPilot(records)
       .map(pr => (
         pr._2.map(_.code).head,
@@ -42,6 +42,6 @@ object RaceMetrics {
     (for (p <- rank.indices) yield (p+1, rank(p)._1, rank(p)._2, rank(p)._3, rank(p)._4)).toList
   }
 
-  def findWinner(records: List[LogRecord]):(Int, String, String, Int, Duration) = rank(records).head
+  def findWinner(records: List[LogRecord]) = rank(records).head
 
 }
