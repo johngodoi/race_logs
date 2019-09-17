@@ -3,6 +3,15 @@ package com.johngodoi.gympass.race
 import java.time.Duration
 
 object RaceMetrics {
+  def bestLap(records: List[LogRecord]):(String,Duration) = records
+    .map(r => (r.piloto,r.tempoVolta))
+    .groupBy(r => r._1)
+    .map(r => (r._1,r._2.map(pr=>pr._2).min))
+    .minBy(_._2)
+
+  def bestLapsByPilot(records: List[LogRecord]):List[(String, Duration)] = records.groupBy(r => r.piloto)
+    .map(pr => (pr._1, pr._2.map(r=>r.tempoVolta).min)).toList
+
   def rank(records: List[LogRecord]):List[(Int, String, String, Int, Duration)] = {
     val rank = records
       .groupBy(r => r.piloto)
