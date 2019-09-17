@@ -6,13 +6,13 @@ import org.scalatest.{FlatSpec, Matchers}
 
 class RaceMetricsUnitTest extends FlatSpec with Matchers {
 
+  private val records = LogLoader.load(".\\src\\test\\resources\\race_results.log")
+
   "From LogRecord list" should "find winner" in {
-    val records = LogLoader.load(".\\src\\test\\resources\\race_results.log")
     RaceMetrics.findWinner(records) should be (1,"038","F.MASSA",4,Duration.parse("PT04M11.578S") )
   }
 
   "From LogRecord list" should "mount rank" in {
-    val records = LogLoader.load(".\\src\\test\\resources\\race_results.log")
     RaceMetrics.rank(records) should contain theSameElementsAs
       List((1,"038","F.MASSA",4,Duration.parse("PT4M11.578S")),
     (2,"002","K.RAIKKONEN",4,Duration.parse("PT4M15.153S")),
@@ -23,7 +23,6 @@ class RaceMetricsUnitTest extends FlatSpec with Matchers {
   }
 
   "From LogRecord list" should "find best lap for each pilot" in{
-    val records = LogLoader.load(".\\src\\test\\resources\\race_results.log")
     RaceMetrics.bestLapsByPilot(records) should contain theSameElementsAs
       List(("K.RAIKKONEN",Duration.parse("PT1M3.076S")),
         ("S.VETTEL",Duration.parse("PT1M18.097S")),
@@ -35,7 +34,18 @@ class RaceMetricsUnitTest extends FlatSpec with Matchers {
   }
 
   "From LogRecord list" should "find race's best lap" in{
-    val records = LogLoader.load(".\\src\\test\\resources\\race_results.log")
     RaceMetrics.bestLap(records) should be ("F.MASSA",Duration.parse("PT1M2.769S"))
+  }
+
+  "From LogRecord list" should "find average speed during the race for each pilot" in{
+    RaceMetrics.averageSpeedByPilot(records) should contain theSameElementsAs
+      List(
+        ("K.RAIKKONEN",43.627250000000004),
+        ("S.VETTEL",25.745666666666665),
+        ("F.MASSA",44.24575),
+        ("F.ALONSO",38.06625),
+        ("R.BARRICHELLO",43.467999999999996),
+        ("M.WEBBER",43.191250000000004)
+      )
   }
 }
