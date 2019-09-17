@@ -7,27 +7,16 @@ object RaceMetrics {
   private def groupByPilot(records: List[LogRecord]) = records.groupBy(_.name)
 
   def rankWithTimeDifferences(records: List[LogRecord]) = {
-    val finishingTime = processByPilot(
-      records,
-      xs => xs.map(_.time).max
-    )
+    val finishingTime = processByPilot(xs => xs.map(_.time).max)(records)
     val smallerFinishingTime = finishingTime.values.min
-    finishingTime.mapValues(Duration.between(_,smallerFinishingTime))
-      .toList.sortWith((r1,r2) => r1._2.compareTo(r2._2)>0)
+    finishingTime.mapValues(Duration.between(_,smallerFinishingTime)).toList.sortBy(_._2)
   }
 
-  def averageSpeedByPilot(records: List[LogRecord]) = processByPilot(
-    records,
-    xs => xs.map(_.lapAverageSpeed).sum/xs.size
-  ).toList
+  def averageSpeedByPilot(records: List[LogRecord]) = processByPilot(xs => xs.map(_.lapAverageSpeed).sum/xs.size)(records).toList
 
-  def bestLapsByPilot(records: List[LogRecord]) = processByPilot(
-    records,
-    xs => xs.map(_.lapTime).min
-  ).toList
+  def bestLapsByPilot(records: List[LogRecord]) = processByPilot(xs => xs.map(_.lapTime).min)(records).toList
 
-  def processByPilot[A](records: List[LogRecord], f: List[LogRecord] => A) = groupByPilot(records)
-    .mapValues(f(_))
+  def processByPilot[A](f: List[LogRecord] => A)(records: List[LogRecord]) = groupByPilot(records).mapValues(f(_))
 
   def bestLap(records: List[LogRecord]) = bestLapsByPilot(records).minBy(_._2)
 
