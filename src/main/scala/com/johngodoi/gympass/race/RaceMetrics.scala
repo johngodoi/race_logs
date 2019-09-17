@@ -3,6 +3,15 @@ package com.johngodoi.gympass.race
 import java.time.Duration
 
 object RaceMetrics {
+
+  def rankWithTimeDifferences(records: List[LogRecord]):List[(String,Duration)] = {
+    val finishingTime = records
+      .groupBy(_.piloto).map(pr => (pr._1, pr._2.map(_.time).max))
+    val smallerFinishingTime = finishingTime.values.min
+    finishingTime.map(ft =>(ft._1,Duration.between(ft._2,smallerFinishingTime)))
+      .toList.sortWith((r1,r2) => r1._2.compareTo(r2._2)>0)
+  }
+
   def averageSpeedByPilot(records: List[LogRecord]):List[(String,Double)] = records
     .groupBy(_.piloto)
     .map(pr => (

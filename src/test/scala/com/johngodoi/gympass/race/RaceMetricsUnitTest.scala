@@ -48,4 +48,16 @@ class RaceMetricsUnitTest extends FlatSpec with Matchers {
         ("M.WEBBER",43.191250000000004)
       )
   }
+
+  "From LogRecord list" should "mount rank with time difference" in {
+    RaceMetrics.rankWithTimeDifferences(records) should contain theSameElementsAs
+      List(
+        ("F.MASSA",Duration.parse("PT0S")),
+        ("K.RAIKKONEN",Duration.parse("PT-5.117S")),
+        ("R.BARRICHELLO",Duration.parse("PT-5.583S")),
+        ("M.WEBBER",Duration.parse("PT-8.972S")),
+        ("F.ALONSO",Duration.parse("PT-49.738S")),
+        ("S.VETTEL",Duration.parse("PT-2M-40.754S"))
+      )
+  }
 }
