@@ -9,7 +9,7 @@ object RaceMetrics {
   def rankWithTimeDifferences(records: List[LogRecord]) = {
     val finishingTime = processByPilot(xs => xs.map(_.time).max)(records)
     val smallerFinishingTime = finishingTime.values.min
-    finishingTime.mapValues(Duration.between(_,smallerFinishingTime)).toList.sortBy(_._2)
+    finishingTime.mapValues(Duration.between(_,smallerFinishingTime)).toList.sortBy(_._2).reverse
   }
 
   def averageSpeedByPilot(records: List[LogRecord]) = processByPilot(xs => xs.map(_.lapAverageSpeed).sum/xs.size)(records).toList
@@ -27,7 +27,7 @@ object RaceMetrics {
         pr._1,
         pr._2.map(_.lapNumber).max,
         pr._2.map(_.lapTime).reduce(_ plus _)
-      )).toList.sortWith((pr1, pr2) => pr1._4.compareTo(pr2._4) < 0)
+      )).toList.sortBy(_._4)
     (for (p <- rank.indices) yield (p+1, rank(p)._1, rank(p)._2, rank(p)._3, rank(p)._4)).toList
   }
 
